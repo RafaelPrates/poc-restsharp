@@ -21,43 +21,50 @@ namespace poc_restsharp_superdigital
         public void testePositivoInfraEcho()
         {
             var client = new RestClient(RequestConstants.BaseUrl);
-            var request = new RestRequest("/restgateway/api/infra/echo", Method.POST);
+            var request = new RestRequest("/restgateway/api/rec/withdraw", Method.POST);
 
-            var body = new
+            var WithdrawReq = new
             {
-                msgID = 2019103017081911000,
-                dt = "2019-10-30T14:02:53.000-0300",
-                source = "ET",
-                contractID = "5123"
+                msgID = 2019103017093211100,
+                dt = "2019-10-30T05:05:05.000-0300",
+                dhLocal = "2019-10-30T05:05:05.000-0300",
+                dtTransaction = "2019-10-30T17:09:32.222-0300",
+                seqID = "000000666666",
+                contractID = "9999",
+                accountID = "000000000001",
+                clientPassword = "2E9B6E81EC6349E2",
+                withdrawAmount = "00000000100",
+                acquirer = "1"
             };
 
-            request.AddJsonBody(body);
 
-            try
+            request.AddJsonBody(WithdrawReq);
+            
+            response = client.Execute(request);
+
+            string ourNumber = JsonUtils.GetJsonValue(response, "ourNumber");
+            
+
+            var WithdrawConfirmationReq = new
             {
-                response = client.Execute(request);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Não foi possível realizar a chamada: " + e.Message);
-            }
+                msgID = 2019103017094411000,
+                dt = "2019-10-30T08:08:08.000-0300",
+                dhLocal = "2019-10-30T08:08:08.000-000",
+                dtTransaction = "2019-10-30T17:09:44.097-0300",
+                seqID = "000000666666",
+                contractID = "5123",
+                ourNumber = ourNumber,
+                withdrawStatus = "00"
+            };
+
+            request.AddJsonBody(WithdrawConfirmationReq);
+
+            response = client.Execute(request);
+
+            string statusCode = JsonUtils.GetJsonValue(response, "status");
 
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
-            Console.WriteLine(response.Content);
-        }
-
-        [Test]
-        public async System.Threading.Tasks.Task testeContratoIngraEchoAsync()
-        {
-            /*
-            //var schema = await JsonSchema4.FromTypeAsync<Person>();
-            //var schemaData = schema.ToJson();
-            //var errors = schema.Validate("{...}");
-
-            foreach (var error in errors)
-                Console.WriteLine(error.Path + ": " + error.Kind);
-
-            schema = await JsonSchema4.FromJsonAsync(schemaData);*/
+            Console.WriteLine(statusCode);
         }
     }
 }
