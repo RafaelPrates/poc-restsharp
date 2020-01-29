@@ -11,14 +11,13 @@ using NJsonSchema;
 namespace poc_restsharp_superdigital
 {
 
-
     [TestFixture]
     public class TestesAPI
     {
         IRestResponse response;
-        
+
         [Test]
-        public void testePositivoInfraEcho()
+        public void testePositivoRetirada()
         {
             var client = new RestClient(RequestConstants.BaseUrl);
             var request = new RestRequest("/restgateway/api/rec/withdraw", Method.POST);
@@ -26,9 +25,9 @@ namespace poc_restsharp_superdigital
             var WithdrawReq = new
             {
                 msgID = 2019103017093211100,
-                dt = "2019-10-30T05:05:05.000-0300",
-                dhLocal = "2019-10-30T05:05:05.000-0300",
-                dtTransaction = "2019-10-30T17:09:32.222-0300",
+                dt = "",
+                dhLocal = "",
+                dtTransaction = "",
                 seqID = "000000666666",
                 contractID = "9999",
                 accountID = "000000000001",
@@ -41,9 +40,11 @@ namespace poc_restsharp_superdigital
             request.AddJsonBody(WithdrawReq);
             
             response = client.Execute(request);
+            Console.WriteLine(response.Content);
 
             string ourNumber = JsonUtils.GetJsonValue(response, "ourNumber");
-            
+
+            var requestConfirmation = new RestRequest("/restgateway/api/rec/withdraw_confirmation", Method.POST);
 
             var WithdrawConfirmationReq = new
             {
@@ -57,14 +58,14 @@ namespace poc_restsharp_superdigital
                 withdrawStatus = "00"
             };
 
-            request.AddJsonBody(WithdrawConfirmationReq);
+            requestConfirmation.AddJsonBody(WithdrawConfirmationReq);
 
-            response = client.Execute(request);
+            response = client.Execute(requestConfirmation);
+            Console.WriteLine(response.Content);
 
             string statusCode = JsonUtils.GetJsonValue(response, "status");
 
             Assert.AreEqual(response.StatusCode, HttpStatusCode.OK);
-            Console.WriteLine(statusCode);
         }
     }
 }
